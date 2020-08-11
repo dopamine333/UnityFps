@@ -46,6 +46,9 @@ public class Npc : MonoBehaviour
     }
     void Start()
     {
+        Health = MixHealth;
+        healthBar.transform.GetChild(0).gameObject.GetComponent<HealthBar>().SetMixHealth(MixHealth);
+        healthBar.transform.GetChild(0).gameObject.GetComponent<HealthBar>().SetHealth(Health);
 
     }
 
@@ -67,8 +70,7 @@ public class Npc : MonoBehaviour
         healthBar.transform.SetParent(gameObject.transform, true);
         //healthBar.transform.parent = gameObject.transform;
         healthBar.transform.localScale = new Vector3(1, 1, 1);
-        Health = MixHealth;
-        healthBar.transform.GetChild(0).gameObject.GetComponent<HealthBar>().SetMixHealth(MixHealth);
+        
         healthBar.transform.GetChild(0).gameObject.transform.position = healthBarPosition + transform.position;
         healthBar.GetComponent<Billborard>().cam = cam;
     }

@@ -11,11 +11,11 @@
 	public class DoorToggle : MonoBehaviour
     {
 
-        private DoorController doorController;
+        public DoorController doorController;
 
         void Awake()
         {
-            doorController = GetComponent<DoorController>();
+            //doorController = GetComponent<DoorController>();
         }
 
         public void OpenOrCloseDoor()

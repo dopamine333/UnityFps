@@ -59,7 +59,8 @@ public class PlayerAttack : MonoBehaviour
         InitialUI();
         Health = MixHealth;
         HealthBar.GetComponent<HealthBar>().SetMixHealth(MixHealth);
-        
+        HealthBar.GetComponent<HealthBar>().SetHealth(Health);
+        LevelUp();
 
     }
 
@@ -70,7 +71,7 @@ public class PlayerAttack : MonoBehaviour
         {
             CheckUp();
             SetBagObjIndex();
-            LevelUp();
+            
             AccumulateAttack();
 
             //Attack();
@@ -201,7 +202,7 @@ public class PlayerAttack : MonoBehaviour
                 EXP += OnHand.GetComponent<ObjData>().EXP;
                 Health += OnHand.GetComponent<ObjData>().RecoveryNum;
                 HealthBar.GetComponent<HealthBar>().SetHealth(Health);
-
+                LevelUp();
                 if (InBag.Count != 0)
                 {
                     InBag.Remove(InBag[BagObjIndex]);
