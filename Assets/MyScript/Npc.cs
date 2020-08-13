@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Threading;
 //using System.Runtime.Remoting.Messaging;
 using UnityEngine;
+using GameStatus;
 
 public class Npc : MonoBehaviour
 {
@@ -28,20 +29,23 @@ public class Npc : MonoBehaviour
     [Header("isNotBoss")]
     public GameObject WalkAroundPoint1;
     public GameObject WalkAroundPoint2;
-    
     public float WalkAroundSpeed=1;
+    public float WalkAroundPower = 80;
     public Vector3 WalkPoint;
     float time = 1;
+    GameObject tf;
+    public float smooth = 5.0F;
     // Start is called before the first frame update
     void Awake()
     {
-
+        tf = new GameObject();
         AddAndSetMeshCollider();
         AddAndSetRigidbody();
         AddAndSetHealthBar();
+        
         if (!isBoss)
         {
-            WalkAroundSpeed = Random.Range(1, 6);
+            WalkAroundSpeed = Random.Range(2, 5);
         }
     }
     void Start()
@@ -49,20 +53,25 @@ public class Npc : MonoBehaviour
         Health = MixHealth;
         healthBar.transform.GetChild(0).gameObject.GetComponent<HealthBar>().SetMixHealth(MixHealth);
         healthBar.transform.GetChild(0).gameObject.GetComponent<HealthBar>().SetHealth(Health);
-
+       
+        GetComponent<Rigidbody>().centerOfMass = new Vector3(0, 0.126f, -0.06f);
     }
-
+    
     // Update is called once per frame
     void Update()
     {
-        if (!isBoss)
+        if(GameStatus.GameStatus.status == gameStatus.Playing)
         {
-            WalkAround();
+            if (!isBoss)
+            {
+                WalkAround();
+            }
+            if (Health < 0)
+            {
+                Death();
+            }
         }
-        if (Health < 0)
-        {
-            Death();
-        }
+        
     }
     void AddAndSetHealthBar()
     {
@@ -81,10 +90,11 @@ public class Npc : MonoBehaviour
     }
     void AddAndSetMeshCollider()
     {
-        MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>();
+        MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>() as MeshCollider;
         meshCollider.convex = true;
     }
-
+    
+    
     void OnCollisionEnter(Collision col)
     {
         ContactPoint contact = col.contacts[0];
@@ -99,7 +109,7 @@ public class Npc : MonoBehaviour
         if (col.gameObject.GetComponent<ObjData>() != null)
         {
             //Debug.Log(col.gameObject.GetComponent<ObjData>().speed);
-            TakeDamage(0.5f*position,col.gameObject.GetComponent<ObjData>().mass * col.gameObject.GetComponent<ObjData>().speed * col.gameObject.GetComponent<ObjData>().speed);
+            TakeDamage(position, 0.5f * col.gameObject.GetComponent<ObjData>().mass * col.gameObject.GetComponent<ObjData>().speed * col.gameObject.GetComponent<ObjData>().speed);
         }
     }
     void TakeDamage(Vector3 position,float damage)
@@ -107,31 +117,34 @@ public class Npc : MonoBehaviour
         if (damage > 1)
         {
             Health -= damage;
+            healthBar.transform.GetChild(0).gameObject.GetComponent<HealthBar>().SetHealth(Health);
         }
-        healthBar.transform.GetChild(0).gameObject.GetComponent<HealthBar>().SetHealth(Health);
-        if( damage > 5 )
-        PlayTakeDamageEffect(position);
+        if( damage > 3 )
+            PlayTakeDamageEffect(position);
     }
     void PlayTakeDamageEffect(Vector3 position)
     {
         GameObject Effect = Instantiate(TakeDamageEffect, position, Quaternion.identity);
-        Destroy(Effect, 10);
+        Destroy(Effect, 5);
     }
     void WalkAround()
     {
         time += 1;
-        if (time % (WalkAroundSpeed*60)== 0)
+        if ((time % (WalkAroundSpeed * 60) == 0)  )
         {
-            WalkPoint = new Vector3(
-           Random.Range(WalkAroundPoint1.transform.position.x, WalkAroundPoint2.transform.position.x),
-           Random.Range(WalkAroundPoint1.transform.position.y, WalkAroundPoint2.transform.position.y),
-           Random.Range(WalkAroundPoint1.transform.position.z, WalkAroundPoint2.transform.position.z));
-            transform.LookAt(WalkPoint);
-            GetComponent<Rigidbody>().AddForce(transform.forward * Time.fixedDeltaTime * 100 * WalkAroundSpeed, ForceMode.Impulse);
-            
-        }
+            GetComponent<Rigidbody>().AddForce(transform.forward * Time.fixedDeltaTime * WalkAroundSpeed * WalkAroundPower, ForceMode.Impulse);
 
-        
+            WalkPoint = new Vector3(
+                       Random.Range(WalkAroundPoint1.transform.position.x, WalkAroundPoint2.transform.position.x),
+                       Random.Range(WalkAroundPoint1.transform.position.y, WalkAroundPoint2.transform.position.y),
+                       Random.Range(WalkAroundPoint1.transform.position.z, WalkAroundPoint2.transform.position.z));
+            
+            tf.transform.LookAt(WalkPoint);
+        }
+        tf.transform.position = transform.position;
+        transform.rotation = Quaternion.Lerp(transform.rotation, tf.transform.rotation, Time.deltaTime * smooth);
+        //transform.rotation = Quaternion.Lerp(transform.rotation, new Quaternion(tf.transform.rotation.x, tf.transform.rotation.y, tf.transform.rotation.z, tf.transform.rotation.w), Time.deltaTime * smooth);
+
     }
     void Death()
     {

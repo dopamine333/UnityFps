@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 
 using UnityEngine;
+using GameStatus;
+
 
 public class PlayerMove : MonoBehaviour
 {
@@ -26,7 +28,7 @@ public class PlayerMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!PauseMenu.GameIsPaused)
+        if (GameStatus.GameStatus.status == gameStatus.Playing)
         {
             Movement();
             Rotation();

@@ -4,7 +4,7 @@
 //using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
-
+using GameStatus;
 
 public class ObjData : MonoBehaviour
 {
@@ -122,21 +122,21 @@ public class ObjData : MonoBehaviour
         
         if(obj.gameObject.tag != "Player")
         {
-            
-            PlayCollisionEffect(speed * mass);
 
-            if (speed * mass > 10)
+            PlayCollisionAudio(0.5f * speed * speed * mass);
+
+            if (0.5f * speed * speed * mass > 5) 
             {
                 PlayCollisionEffect(position);
             }
         }
         
     }
-    void PlayCollisionEffect(float power)
+    void PlayCollisionAudio(float power)
     {
         float proportion = Random.Range(0.8f , 0.2f);
-        CollisionAudioSource1.PlayOneShot(CollisionAudioSource1.clip, (power-2) * proportion * volume1);
-        CollisionAudioSource2.PlayOneShot(CollisionAudioSource2.clip, (power-2) * (1 - proportion) * volume2);
+        CollisionAudioSource1.PlayOneShot(CollisionAudioSource1.clip, (power) * proportion * volume1);
+        CollisionAudioSource2.PlayOneShot(CollisionAudioSource2.clip, (power) * (1 - proportion) * volume2);
 
     }
      

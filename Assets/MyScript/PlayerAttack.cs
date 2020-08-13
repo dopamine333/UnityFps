@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
+using GameStatus;
 
 public class PlayerAttack : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class PlayerAttack : MonoBehaviour
     public int level = 0;
     public float MixHealth = 20;
     public float Health;
+    public float AttackRange = 2;
 
     float InitialPower;
     float MixAccumulateTime;
@@ -67,9 +69,9 @@ public class PlayerAttack : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!PauseMenu.GameIsPaused)
+        if (GameStatus.GameStatus.status == gameStatus.Playing)
         {
-            CheckUp();
+
             SetBagObjIndex();
             
             AccumulateAttack();
@@ -85,12 +87,18 @@ public class PlayerAttack : MonoBehaviour
         }
 
     }
-   
+    void FixedUpdate()
+    {
+        if (GameStatus.GameStatus.status == gameStatus.Playing)
+        {
+            CheckUp();
+        }
+    }
     void CheckUp()
     {
         Vector3 position = new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0.0f);
         Ray ray = cam.ScreenPointToRay(position);
-        if (Physics.Raycast(ray, out hit))
+        if (Physics.Raycast(ray, out hit, AttackRange,-5,QueryTriggerInteraction.Ignore))
         {
             Debug.DrawLine(ray.origin, hit.point, Color.red);
 
@@ -201,6 +209,10 @@ public class PlayerAttack : MonoBehaviour
                 Debug.Log("Eat!!!");
                 EXP += OnHand.GetComponent<ObjData>().EXP;
                 Health += OnHand.GetComponent<ObjData>().RecoveryNum;
+                if (Health >= MixHealth)
+                {
+                    Health = MixHealth;
+                }
                 HealthBar.GetComponent<HealthBar>().SetHealth(Health);
                 LevelUp();
                 if (InBag.Count != 0)
@@ -236,6 +248,7 @@ public class PlayerAttack : MonoBehaviour
         OnHand.SetActive(true);
 
         OnHand.GetComponent<Rigidbody>().AddForce(cam.transform.forward * Time.fixedDeltaTime * power, ForceMode.Impulse);
+        GetComponent<Rigidbody>().AddForce(-cam.transform.forward * Time.fixedDeltaTime * power, ForceMode.Impulse);
         //OnHand.GetComponent<ObjData>().speed = 0;
 
         //OnHand.GetComponent<Rigidbody>().angularVelocity = Random.insideUnitSphere * Time.fixedDeltaTime;
@@ -304,12 +317,20 @@ public class PlayerAttack : MonoBehaviour
         }
         else
         {
-            GetComponent<Rigidbody>().AddForce((transform.position-position) * Time.fixedDeltaTime * 1300f, ForceMode.Impulse);
+            GetComponent<Rigidbody>().AddForce((transform.position-position) * Time.fixedDeltaTime *800f, ForceMode.Impulse);
         }
         Health -= damage;
+        if (Health <= 0)
+        {
+            GameOver();
+        }
         HealthBar.GetComponent<HealthBar>().SetHealth(Health);
     }
+    void GameOver()
+    {
+        GameStatus.GameStatus.status = gameStatus.GameOver;
 
+    }
     void LevelUp()
     {
         if (EXP > 10000)
@@ -358,7 +379,7 @@ public class PlayerAttack : MonoBehaviour
         {
             MixPower = 900f;
             InitialPower = 200f;
-            MixAccumulateTime = 3f;
+            MixAccumulateTime = 3.5f;
         }
         if (level == 1)
         {

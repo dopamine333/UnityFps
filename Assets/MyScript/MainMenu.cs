@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using GameStatus;
 
 public class MainMenu : MonoBehaviour
 {
@@ -25,14 +26,20 @@ public class MainMenu : MonoBehaviour
         }
         time += 1;
         cam.transform.position = Vector3.SmoothDamp(cam.transform.position, targetPosition, ref currentVelocity, smoothTime, maxSpeed);
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            Debug.Log("now gamestatus is " + GameStatus.GameStatus.status);
+        }
     }
     public void LoadMainScene()
     {
         //Time.timeScale = 1f;
-        PauseMenu.GameIsPaused = false;
+        //PauseMenu.GameIsPaused = false;
         SceneManager.LoadScene("main");
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        GameStatus.GameStatus.status = gameStatus.Playing;
+
     }
     public void QuitGame()
     {
