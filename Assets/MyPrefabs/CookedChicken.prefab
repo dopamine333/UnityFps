@@ -92,10 +92,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c81eed7e454eec94faffcc5287170ddd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  type: 0
   mass: 0.8
+  OffsetPosition: {x: 0, y: 0, z: 0}
+  OffsetQuaternion: {x: 0, y: 0, z: 0, w: 0}
   CanEat: 1
   EXP: 7
-  RecoveryNum: 4
+  PlusHealthNum: 7
   AfterCooking: {fileID: 0}
   TrailEffect: {fileID: 1463794980869555992, guid: 280c97dc74e703d4382d8b0725db56e4,
     type: 3}
@@ -108,3 +111,4 @@ MonoBehaviour:
   volume2: 1
   mySprite: {fileID: 21300000, guid: 7531dab1c97aa574e8ce7ed7e8c80110, type: 3}
   speed: 0
+  meshCollider: {fileID: 0}

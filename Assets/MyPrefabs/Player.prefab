@@ -240,7 +240,7 @@ MonoBehaviour:
   BeCheckObj: {fileID: 0}
   cam: {fileID: 3053048406307363453}
   MixCameraField: 20
-  InitialCameraField: 60
+  InitialCameraField: 80
   testPoint: {fileID: 0}
 --- !u!114 &3053048408104825389
 MonoBehaviour:

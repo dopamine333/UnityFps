@@ -11,6 +11,8 @@ public class PlayerAttack : MonoBehaviour
     public int BagObjIndex = 0;
     public GameObject OnHand;
     public List<GameObject> InBag;
+    public float smooth = 12f;
+
     //public int NowBagLength = 0;
 
     public int EXP = 0;
@@ -43,21 +45,29 @@ public class PlayerAttack : MonoBehaviour
     [Header("")]
     //Ray ray;
     RaycastHit hit;
+    RaycastHit hit2;
     public GameObject BeCheckObj;
-    //public Vector3 BeCheckPoint;
+    public Vector3 BeCheckPoint;
 
     
     [SerializeField]
     Camera cam;
     public float MixCameraField=20f;
-    public float InitialCameraField = 60f;
+    public float InitialCameraField = 80f;
     //public float CameraField = 60f;
 
+    GameObject Hand;
+    public GameObject HandPoint;
+    public GameObject HandPoint_Small;
+    public GameObject HandPoint_Big;
+    public GameObject HandPoint_Long;
 
     public GameObject testPoint;
     // Start is called before the first frame update
     void Start()
     {
+        Hand = new GameObject("Hand");
+        cam.fieldOfView = InitialCameraField;
         InitialUI();
         Health = MixHealth;
         HealthBar.GetComponent<HealthBar>().SetMixHealth(MixHealth);
@@ -71,17 +81,19 @@ public class PlayerAttack : MonoBehaviour
     {
         if (GameStatus.GameStatus.status == gameStatus.Playing)
         {
-
-            SetBagObjIndex();
             
-            AccumulateAttack();
 
-            //Attack();
-            Eat();
+
             PickUp();
             OpenOrCloseDoor();
             SetUI();
+            SetBagObjIndex();
 
+            SetHandPosition(); 
+            Eat();
+            AccumulateAttack();
+            
+           
             Test();
 
         }
@@ -98,31 +110,31 @@ public class PlayerAttack : MonoBehaviour
     {
         Vector3 position = new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0.0f);
         Ray ray = cam.ScreenPointToRay(position);
-        if (Physics.Raycast(ray, out hit, AttackRange,-5,QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(ray, out hit, AttackRange, -5, QueryTriggerInteraction.Ignore))
         {
             Debug.DrawLine(ray.origin, hit.point, Color.red);
 
             if (BeCheckObj != null && BeCheckObj.tag == "CanThrow")
-            {   
+            {
                 if (BeCheckObj.GetComponent<Renderer>() != null)
+                {
+                    var BeCheckObjMaterial = BeCheckObj.GetComponent<Renderer>().material;
+                    if (BeCheckObj != hit.collider.gameObject)
                     {
-                        if (BeCheckObj != hit.collider.gameObject)
-                        {
-                            BeCheckObj.GetComponent<Renderer>().material.DisableKeyword("_EMISSION");
-                            BeCheckObj.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.black);
+                        BeCheckObjMaterial.DisableKeyword("_EMISSION");
+                        BeCheckObjMaterial.SetColor("_EmissionColor", Color.black);
 
-
-                        }
-                        else
-                        {
-                            BeCheckObj.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.blue);
-                            BeCheckObj.GetComponent<Renderer>().material.EnableKeyword("_EMISSION");
-
-                        }
                     }
+                    else
+                    {
+                        BeCheckObjMaterial.SetColor("_EmissionColor", Color.blue);
+                        BeCheckObjMaterial.EnableKeyword("_EMISSION");
+
+                    }
+                }
             }
             BeCheckObj = hit.collider.gameObject;
-            //BeCheckPoint = hit.point;
+           
 
         }
         else
@@ -136,26 +148,36 @@ public class PlayerAttack : MonoBehaviour
                     BeCheckObj.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.black);
                 }
             }
-            
+
             BeCheckObj = null;
         }
-        
+        Ray ray2 = cam.ScreenPointToRay(position);
+        if (Physics.Raycast(ray2, out hit2,100,-5,QueryTriggerInteraction.Ignore))
+        {
+            Debug.DrawLine(ray2.origin, hit2.point, Color.blue);
+            BeCheckPoint = hit2.point;
+        }
+        else
+        {
+            BeCheckPoint = cam.transform.forward*100 + cam.transform.position;
+        }
         
     }
-
     void PickUp()
     {
         if (Input.GetKeyDown(KeyCode.E) && BeCheckObj != null && BeCheckObj.GetComponent<ObjData>() != null)
         {
             BeCheckObj.GetComponent<Rigidbody>().velocity = Vector3.zero;
-            
-            BeCheckObj.SetActive(false);
+            BeCheckObj.GetComponent<Rigidbody>().isKinematic = true;
+
+            BeCheckObj.GetComponent<ObjData>().meshCollider.isTrigger = true;
+
             InBag.Insert(BagObjIndex, BeCheckObj);
-            
-            //InBag.Add(BeCheckObj);
-              
+
+            SetBagObjIndex();
+
         }
-          
+
     }
 
     void OpenOrCloseDoor()
@@ -169,16 +191,18 @@ public class PlayerAttack : MonoBehaviour
 
     void SetBagObjIndex()
     {
-        
-        if (Input.GetAxis("Mouse ScrollWheel") > 0)
+        for (int i = 0; i < InBag.Count; i++)
+        {
+            //Count獲得List中元素數目
+            InBag[i].SetActive(false);
+        }
+            if (Input.GetAxis("Mouse ScrollWheel") > 0)
         {
             BagObjIndex++;
         }
-        
         if (Input.GetAxis("Mouse ScrollWheel") < 0)
         {
             BagObjIndex--;
-            
         }
         if (BagObjIndex > InBag.Count - 1)
             BagObjIndex = 0;
@@ -192,12 +216,14 @@ public class PlayerAttack : MonoBehaviour
         if (InBag.Count != 0)
         {
             OnHand = InBag[BagObjIndex];
+            OnHand.SetActive(true);
+
         }
         else
         {
             OnHand = null;
+            
         }
-        
     }
 
     void Eat()
@@ -208,57 +234,88 @@ public class PlayerAttack : MonoBehaviour
             {
                 Debug.Log("Eat!!!");
                 EXP += OnHand.GetComponent<ObjData>().EXP;
-                Health += OnHand.GetComponent<ObjData>().RecoveryNum;
+                Health += OnHand.GetComponent<ObjData>().PlusHealthNum;
                 if (Health >= MixHealth)
                 {
                     Health = MixHealth;
                 }
                 HealthBar.GetComponent<HealthBar>().SetHealth(Health);
                 LevelUp();
-                if (InBag.Count != 0)
-                {
-                    InBag.Remove(InBag[BagObjIndex]);
-                }
+
+                Destroy(InBag[BagObjIndex]);
+                InBag.Remove(InBag[BagObjIndex]);
+                
                 SetBagObjIndex();
             }
         }
     }
+    void SetHandPosition()
+    {
+        if (OnHand != null)
+        {
+            var OnHandObjType = OnHand.GetComponent<ObjData>().type;
+            if (OnHandObjType == ObjData.Type.Small)
+            {
+                //Debug.Log("Small");
+                HandPoint = HandPoint_Small;
+            }
+            else if (OnHandObjType == ObjData.Type.Big)
+            {
+                //Debug.Log("Big");
+                HandPoint = HandPoint_Big;
 
+            }
+            else if (OnHandObjType == ObjData.Type.Long)
+            {
+                //Debug.Log("Long");
+                HandPoint = HandPoint_Long;
+
+            }
+            Vector3 OffsetPosition = OnHand.GetComponent<ObjData>().OffsetPosition;
+            Transform HandFt = Hand.transform;
+            OnHand.transform.rotation = HandFt.rotation * OnHand.GetComponent<ObjData>().OffsetQuaternion;
+            OnHand.transform.position = HandFt.position + OnHand.transform.rotation * -OffsetPosition;
+        }
+        else
+        {
+            HandPoint = HandPoint_Small;
+        }
+        Hand.transform.position = Vector3.Lerp(Hand.transform.position, HandPoint.transform.position, Time.deltaTime * smooth);
+        Hand.transform.rotation = Quaternion.Lerp(Hand.transform.rotation, HandPoint.transform.rotation, Time.deltaTime * smooth);
+
+
+    }
     void Attack(float power)
     {
 
-        if (90f > cam.transform.eulerAngles.x && cam.transform.eulerAngles.x > 23f)
+        if (90f > cam.transform.eulerAngles.x && cam.transform.eulerAngles.x > 90f)
         {
             //Debug.Log(cam.transform.eulerAngles.x);
-            OnHand.transform.position = cam.transform.position + transform.forward;
-            OnHand.transform.LookAt(OnHand.transform.position + cam.transform.right);
+           ////OnHand.transform.position = cam.transform.position + transform.forward;
+            //OnHand.transform.LookAt(OnHand.transform.position + cam.transform.right);
 
         }
         else
         {
             //Debug.Log(cam.transform.eulerAngles.x);
-            OnHand.transform.position = cam.transform.position + cam.transform.forward;
-            OnHand.transform.LookAt(OnHand.transform.position + cam.transform.right);
-            Vector3 vec = cam.transform.eulerAngles;
-            OnHand.transform.eulerAngles += new Vector3(0, 0, vec.x);
+            ////OnHand.transform.position = cam.transform.position + cam.transform.forward;
+            //OnHand.transform.LookAt(OnHand.transform.position + cam.transform.right);
+            //Vector3 vec = cam.transform.eulerAngles;
+            //OnHand.transform.eulerAngles += new Vector3(0, 0, vec.x);
         }
 
-        
         OnHand.GetComponent<Rigidbody>().isKinematic = false;
-        OnHand.SetActive(true);
+        OnHand.GetComponent<ObjData>().meshCollider.isTrigger = false;
 
-        OnHand.GetComponent<Rigidbody>().AddForce(cam.transform.forward * Time.fixedDeltaTime * power, ForceMode.Impulse);
+        //OnHand.GetComponent<Rigidbody>().AddForce(cam.transform.forward * Time.fixedDeltaTime * power, ForceMode.Impulse);
+        OnHand.GetComponent<Rigidbody>().AddForce((BeCheckPoint - HandPoint.transform.position).normalized * Time.fixedDeltaTime * power, ForceMode.Impulse);
+
         GetComponent<Rigidbody>().AddForce(-cam.transform.forward * Time.fixedDeltaTime * power, ForceMode.Impulse);
-        //OnHand.GetComponent<ObjData>().speed = 0;
-
         //OnHand.GetComponent<Rigidbody>().angularVelocity = Random.insideUnitSphere * Time.fixedDeltaTime;
 
-        if (InBag.Count != 0)
-        {
-            InBag.Remove(InBag[BagObjIndex]);
-        }
-        SetBagObjIndex();
 
+        InBag.Remove(InBag[BagObjIndex]);
+        SetBagObjIndex();
 
     }
 
@@ -377,15 +434,18 @@ public class PlayerAttack : MonoBehaviour
 
         if (level == 0)
         {
-            MixPower = 900f;
+            MixPower = 2000f;
             InitialPower = 200f;
-            MixAccumulateTime = 3.5f;
+            MixAccumulateTime = 4f;
+            //MixCameraField = 45f;
         }
         if (level == 1)
         {
             MixPower = 1200f;
             InitialPower = 250f;
-            MixAccumulateTime = 4f;
+            MixAccumulateTime = 4.2f;
+            //MixCameraField = 45f;
+
         }
         if (level == 2)
         {

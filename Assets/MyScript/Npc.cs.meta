@@ -3,7 +3,15 @@ guid: 308c4febc4b47d442ab8c46984c17780
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - DeathEffect: {fileID: 1450475169552877612, guid: 42ecc68cc7f266d4dab008aac21a477e,
+      type: 3}
+  - TakeDamageEffect: {fileID: 877365042386853426, guid: aa1ee3fc968825643b5076ea625bc722,
+      type: 3}
+  - cam: {instanceID: 0}
+  - HealthBar: {instanceID: 0}
+  - WalkAroundPoint1: {instanceID: 0}
+  - WalkAroundPoint2: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

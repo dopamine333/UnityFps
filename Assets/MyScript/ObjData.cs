@@ -6,14 +6,25 @@ using UnityEngine;
 using UnityEngine.UI;
 using GameStatus;
 
+
 public class ObjData : MonoBehaviour
 {
+    public enum Type
+    {
+        Small,
+        Big,
+        Long
+    }
+    public Type type;
+
     [Range(0.1f,20f)]
     public float mass=1;
-
+    
+    public Vector3 OffsetPosition;
+    public Quaternion OffsetQuaternion;
     public bool CanEat;
     public int EXP;
-    public float RecoveryNum;
+    public float PlusHealthNum;
 
     public GameObject AfterCooking;
     //public int type;
@@ -39,6 +50,7 @@ public class ObjData : MonoBehaviour
     public float speed;
     Vector3 lastPosition = Vector3.zero;
     Rigidbody rb;
+    public MeshCollider meshCollider;
     // Use this for initialization
     void Awake()
     {
@@ -50,7 +62,10 @@ public class ObjData : MonoBehaviour
     }
     void Start()
     {
-       
+        if (type == Type.Small || type == Type.Big)
+        {
+            OffsetQuaternion = new Quaternion(0, 1, 0, 0);
+        }
     }
 
     void Update()
@@ -77,7 +92,7 @@ public class ObjData : MonoBehaviour
     }
     void AddAndSetMeshCollider()
     {
-        MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>() as MeshCollider;
+        meshCollider = gameObject.AddComponent<MeshCollider>() as MeshCollider;
         meshCollider.convex = true;
         
     }

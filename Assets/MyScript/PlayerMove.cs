@@ -35,7 +35,7 @@ public class PlayerMove : MonoBehaviour
             Jump();
             Test();
 
-            CloseMouse();
+           CloseMouse();
 
         }
 
@@ -54,7 +54,8 @@ public class PlayerMove : MonoBehaviour
         if (_velocity != Vector3.zero)
         {
             rb.MovePosition(rb.position + _velocity * Time.fixedDeltaTime);
-            
+            rb.AddForce( _velocity * Time.fixedDeltaTime, ForceMode.Impulse);
+
         }
     }
     void Rotation()

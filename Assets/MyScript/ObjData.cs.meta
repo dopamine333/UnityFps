@@ -3,7 +3,15 @@ guid: c81eed7e454eec94faffcc5287170ddd
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - AfterCooking: {instanceID: 0}
+  - TrailEffect: {fileID: 1463794980869555992, guid: ecaa7dbd224e0924aa990b7e6512aa85,
+      type: 3}
+  - CollisionEffect: {fileID: 5205275275331734473, guid: e8d0805ad4c2cd84faf83cfab48c480a,
+      type: 3}
+  - CollisionAudio1: {fileID: 8300000, guid: 99348d26b121bdf40bca2ff30b000207, type: 3}
+  - CollisionAudio2: {fileID: 8300000, guid: 030515f205b54fc478961cbe39c4e75e, type: 3}
+  - mySprite: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
