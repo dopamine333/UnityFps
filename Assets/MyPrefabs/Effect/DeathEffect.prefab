@@ -318,8 +318,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.1
-      minScalar: 0.25
+      scalar: 0.15
+      minScalar: 0.35
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -706,7 +706,7 @@ ParticleSystem:
     angle: 25
     length: 5
     boxThickness: {x: 0, y: 0, z: 0}
-    radiusThickness: 0.39
+    radiusThickness: 0.95
     donutRadius: 0.2
     m_Position: {x: 0, y: 0, z: 0}
     m_Rotation: {x: 0, y: 0, z: 0}
@@ -789,7 +789,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0
     radius:
-      value: 0.0001
+      value: 1.06
       mode: 0
       spread: 0
       speed:
@@ -1018,7 +1018,7 @@ ParticleSystem:
       countCurve:
         serializedVersion: 2
         minMaxState: 0
-        scalar: 10
+        scalar: 20
         minScalar: 30
         maxCurve:
           serializedVersion: 2
@@ -5241,7 +5241,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 3
       scalar: 0.1
-      minScalar: 0.35
+      minScalar: 0.6
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -5625,7 +5625,7 @@ ParticleSystem:
     serializedVersion: 6
     enabled: 1
     type: 4
-    angle: 13.41
+    angle: 16.87
     length: 5
     boxThickness: {x: 0, y: 0, z: 0}
     radiusThickness: 1
@@ -5711,7 +5711,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0.1
     radius:
-      value: 0.09
+      value: 0.4
       mode: 0
       spread: 0
       speed:
@@ -8795,7 +8795,7 @@ ParticleSystem:
       emitProbability: 1
   LightsModule:
     enabled: 1
-    ratio: 0.12
+    ratio: 0.6
     light: {fileID: 3822794965959891034}
     randomDistribution: 1
     color: 1
@@ -10070,8 +10070,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.08
-      minScalar: 0.25
+      scalar: 0.1
+      minScalar: 0.4
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -10541,7 +10541,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0.06
     randomPositionAmount: 0.1
     radius:
-      value: 0.56
+      value: 0.68
       mode: 0
       spread: 0
       speed:

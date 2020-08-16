@@ -89,11 +89,10 @@ public class PlayerAttack : MonoBehaviour
             SetUI();
             SetBagObjIndex();
 
-            SetHandPosition(); 
             Eat();
             AccumulateAttack();
             
-           
+            
             Test();
 
         }
@@ -104,53 +103,58 @@ public class PlayerAttack : MonoBehaviour
         if (GameStatus.GameStatus.status == gameStatus.Playing)
         {
             CheckUp();
+            SetHandPosition();
         }
     }
     void CheckUp()
     {
         Vector3 position = new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0.0f);
-        Ray ray = cam.ScreenPointToRay(position);
-        if (Physics.Raycast(ray, out hit, AttackRange, -5, QueryTriggerInteraction.Ignore))
-        {
-            Debug.DrawLine(ray.origin, hit.point, Color.red);
 
-            if (BeCheckObj != null && BeCheckObj.tag == "CanThrow")
+        //if(!InAccumulate)
+        
+            Ray ray = cam.ScreenPointToRay(position);
+            if (Physics.Raycast(ray, out hit, AttackRange, -5, QueryTriggerInteraction.Ignore))
             {
-                if (BeCheckObj.GetComponent<Renderer>() != null)
+                Debug.DrawLine(ray.origin, hit.point, Color.red);
+
+                if (BeCheckObj != null && BeCheckObj.tag == "CanThrow")
                 {
-                    var BeCheckObjMaterial = BeCheckObj.GetComponent<Renderer>().material;
-                    if (BeCheckObj != hit.collider.gameObject)
+                    if (BeCheckObj.GetComponent<Renderer>() != null)
                     {
-                        BeCheckObjMaterial.DisableKeyword("_EMISSION");
-                        BeCheckObjMaterial.SetColor("_EmissionColor", Color.black);
+                        var BeCheckObjMaterial = BeCheckObj.GetComponent<Renderer>().material;
+                        if (BeCheckObj != hit.collider.gameObject)
+                        {
+                            BeCheckObjMaterial.DisableKeyword("_EMISSION");
+                            BeCheckObjMaterial.SetColor("_EmissionColor", Color.black);
 
-                    }
-                    else
-                    {
-                        BeCheckObjMaterial.SetColor("_EmissionColor", Color.blue);
-                        BeCheckObjMaterial.EnableKeyword("_EMISSION");
+                        }
+                        else
+                        {
+                            BeCheckObjMaterial.SetColor("_EmissionColor", Color.blue);
+                            BeCheckObjMaterial.EnableKeyword("_EMISSION");
 
+                        }
                     }
                 }
-            }
-            BeCheckObj = hit.collider.gameObject;
+                BeCheckObj = hit.collider.gameObject;
            
 
-        }
-        else
-        {
-            if (BeCheckObj != null)
-            {
-
-                if (BeCheckObj.GetComponent<Renderer>() != null)
-                {
-                    BeCheckObj.GetComponent<Renderer>().material.DisableKeyword("_EMISSION");
-                    BeCheckObj.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.black);
-                }
             }
+            else
+            {
+                if (BeCheckObj != null)
+                {
 
-            BeCheckObj = null;
-        }
+                    if (BeCheckObj.GetComponent<Renderer>() != null)
+                    {
+                        BeCheckObj.GetComponent<Renderer>().material.DisableKeyword("_EMISSION");
+                        BeCheckObj.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.black);
+                    }
+                }
+
+                BeCheckObj = null;
+            }
+        
         Ray ray2 = cam.ScreenPointToRay(position);
         if (Physics.Raycast(ray2, out hit2,100,-5,QueryTriggerInteraction.Ignore))
         {
@@ -273,6 +277,11 @@ public class PlayerAttack : MonoBehaviour
             }
             Vector3 OffsetPosition = OnHand.GetComponent<ObjData>().OffsetPosition;
             Transform HandFt = Hand.transform;
+
+            var rb =OnHand.GetComponent<Rigidbody>();
+
+            //rb.MoveRotation(HandFt.rotation * OnHand.GetComponent<ObjData>().OffsetQuaternion);
+            //rb.MovePosition(HandFt.position + OnHand.transform.rotation * -OffsetPosition);
             OnHand.transform.rotation = HandFt.rotation * OnHand.GetComponent<ObjData>().OffsetQuaternion;
             OnHand.transform.position = HandFt.position + OnHand.transform.rotation * -OffsetPosition;
         }
@@ -344,6 +353,8 @@ public class PlayerAttack : MonoBehaviour
 
                 power = InitialPower;
                 AccumulateTime = 0;
+                InAccumulate = false;
+
                 //cam.fieldOfView = MixPower / power * MixCameraField;
                 cam.fieldOfView = (MixCameraField - InitialCameraField) / (MixPower - InitialPower) * (power - InitialPower) + InitialCameraField;
 
@@ -437,14 +448,14 @@ public class PlayerAttack : MonoBehaviour
             MixPower = 2000f;
             InitialPower = 200f;
             MixAccumulateTime = 4f;
-            //MixCameraField = 45f;
+            MixCameraField = 60f;
         }
         if (level == 1)
         {
             MixPower = 1200f;
             InitialPower = 250f;
             MixAccumulateTime = 4.2f;
-            //MixCameraField = 45f;
+            MixCameraField = 50f;
 
         }
         if (level == 2)

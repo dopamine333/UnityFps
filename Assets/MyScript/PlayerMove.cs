@@ -28,14 +28,18 @@ public class PlayerMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Jump();
+        Test();
+
+        CloseMouse();
+    }
+    void FixedUpdate()
+    {
         if (GameStatus.GameStatus.status == gameStatus.Playing)
         {
             Movement();
             Rotation();
-            Jump();
-            Test();
-
-           CloseMouse();
+          
 
         }
 
@@ -54,7 +58,7 @@ public class PlayerMove : MonoBehaviour
         if (_velocity != Vector3.zero)
         {
             rb.MovePosition(rb.position + _velocity * Time.fixedDeltaTime);
-            rb.AddForce( _velocity * Time.fixedDeltaTime, ForceMode.Impulse);
+            //rb.AddForce( _velocity * Time.fixedDeltaTime, ForceMode.Impulse);
 
         }
     }
