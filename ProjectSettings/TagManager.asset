@@ -6,6 +6,8 @@ TagManager:
   tags:
   - CanThrow
   - Door
+  - Object
+  - SaveAndLoadGameData
   layers:
   - Default
   - TransparentFX

@@ -28,19 +28,19 @@ public class PlayerMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Jump();
-        Test();
-
-        CloseMouse();
+        if (GameStatus.GameStatus.status == gameStatus.Playing)
+        {
+            Jump();
+            Test();
+            Rotation();
+            CloseMouse();
+        }
     }
     void FixedUpdate()
     {
         if (GameStatus.GameStatus.status == gameStatus.Playing)
         {
             Movement();
-            Rotation();
-          
-
         }
 
     }

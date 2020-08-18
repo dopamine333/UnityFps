@@ -9,20 +9,39 @@ using GameStatus;
 
 public class PlayingMenu : MonoBehaviour
 {
-    public static bool GameIsPaused = false;
-
+    public List<GameObject> ObjectDataList = new List<GameObject>();
+    public GameObject Player;
+   // public List<GameObject> ObjectDataList_test;
     public GameObject pauseMenuUI;
     public GameObject gameOverMenuUI;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        LoadObject();
+        LoadPlayer();
     }
 
     // Update is called once per frame
+    void LoadObject()
+    {
+        for (int i = 0; i < ObjectDataList.Count; i++)
+        {
+            ObjectData od = SaveAndLoadGameData.LoadObject(i);
+            ObjectDataList[i].GetComponent<ObjData>().Load(od);
+
+        }
+
+    }
+    void LoadPlayer()
+    {
+        PlayerData p = SaveAndLoadGameData.LoadPlayer();
+        Player.GetComponent<PlayerAttack>().Load(p);
+    }
+
     void Update()
     {
+       // ObjectDataList_test = ObjectDataList;
         if (GameStatus.GameStatus.status == gameStatus.GameOver)
         {
             GameOver();
@@ -37,8 +56,14 @@ public class PlayingMenu : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.L))
         {
-            Debug.Log("now gamestatus is " + GameStatus.GameStatus.status);
+            //Debug.Log("now gamestatus is " + GameStatus.GameStatus.status);
         }
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            //GameObject gameObject = GameObject.FindWithTag("Object");
+            //SaveAndLoadGameData.SaveObject(ObjectDataList);
+        }
+        
     }
     void GameOver()
     {
@@ -49,7 +74,6 @@ public class PlayingMenu : MonoBehaviour
     {
         pauseMenuUI.SetActive(false);
         Time.timeScale = 1f;
-        //GameIsPaused = false;
         GameStatus.GameStatus.status = gameStatus.Playing;
 
     }
@@ -59,15 +83,15 @@ public class PlayingMenu : MonoBehaviour
         Cursor.visible = true;
         pauseMenuUI.SetActive(true);
         Time.timeScale = 0f;
-        //GameIsPaused = true;
         GameStatus.GameStatus.status = gameStatus.Pause;
     }
     public void LoadMainMenu()
     {
         Time.timeScale = 1f;
+        SaveAndLoadGameData.SaveObject(ObjectDataList);
+        SaveAndLoadGameData.SavePlayer(Player);
         SceneManager.LoadScene("menu");
         GameStatus.GameStatus.status = gameStatus.MainMenu;
-
     }
     public void QuitGame()
     {

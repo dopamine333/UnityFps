@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using GameStatus;
 
-
 public class ObjData : MonoBehaviour
 {
     public enum Type
@@ -17,9 +16,10 @@ public class ObjData : MonoBehaviour
     }
     public Type type;
 
-    [Range(0.1f,20f)]
-    public float mass=1;
-    
+    [Range(0.1f, 20f)]
+    public float mass = 1;
+    public float damage = 1;
+
     public Vector3 OffsetPosition;
     public Quaternion OffsetQuaternion;
     public bool CanEat;
@@ -52,22 +52,40 @@ public class ObjData : MonoBehaviour
     Rigidbody rb;
     public MeshCollider meshCollider;
     // Use this for initialization
+    static int Num = 0;
+    public int MyNum = -1;
+    
     void Awake()
     {
+        
         AddAndSetRigidbody();
         AddAndSetMeshCollider();
-        AddAndSetTrailEffect();
-        AddAndSetAudioSource();
-        SetTag();
+
+        GameObject s = GameObject.FindWithTag("SaveAndLoadGameData");
+        s.GetComponent<PlayingMenu>().ObjectDataList.Add(gameObject);
     }
+
     void Start()
     {
         if (type == Type.Small || type == Type.Big)
         {
-            OffsetQuaternion = new Quaternion(0, 1, 0, 0);
+            OffsetQuaternion = new Quaternion(0, 0, 0, 1);
+        }
+
+        AddAndSetTrailEffect();
+        AddAndSetAudioSource();
+        SetTag();
+    }
+    public void Load(ObjectData o)
+    {
+        if (o != null)
+        {
+            transform.position = o.position;
+            transform.rotation = o.rotation;
+            GetComponent<Rigidbody>().velocity = o.velocity;
+
         }
     }
-
     void Update()
     {
         
@@ -79,8 +97,6 @@ public class ObjData : MonoBehaviour
     }
     void GetSpeed()
     {
-        //speed = (((transform.position - lastPosition).magnitude) / Time.deltaTime);
-        //lastPosition = transform.position;
         speed = rb.velocity.magnitude;
 
     }
@@ -98,7 +114,7 @@ public class ObjData : MonoBehaviour
     }
     void SetTag()
     {
-        gameObject.tag = "CanThrow";
+        gameObject.tag = "Object";
     }
     void AddAndSetTrailEffect()
     {

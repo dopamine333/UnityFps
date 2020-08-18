@@ -2,6 +2,7 @@ ScriptsOnlyBuild:
   usedScripts:
     Assembly-CSharp.dll:
     - Billborard
+    - CameraFollow
     - DoorController
     - DoorToggle
     - Fire
@@ -10,19 +11,13 @@ ScriptsOnlyBuild:
     - MainMenuObj
     - Npc
     - ObjData
-    - PauseMenu
     - PlayerAttack
     - PlayerMove
+    - PlayingMenu
     - csDestroyEffect
     - test
     Unity.Rider.Editor.dll:
     - Packages.Rider.Editor.UnitTesting.CallbackData
-    UnityEditor.Graphs.dll:
-    - UnityEditor.Graphs.AnimationBlendTree.Graph
-    - UnityEditor.Graphs.AnimationBlendTree.GraphGUI
-    - UnityEditor.Graphs.AnimationStateMachine.Graph
-    - UnityEditor.Graphs.AnimationStateMachine.GraphGUI
-    - UnityEditor.Graphs.AnimatorControllerTool
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.Api.CallbacksHolder
     - UnityEditor.TestTools.TestRunner.TestListCacheData
@@ -85,45 +80,43 @@ ScriptsOnlyBuild:
     - Class: 111
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 11554}
+      Script: {instanceID: 11260}
     - Class: 114
-      Script: {instanceID: 11712}
+      Script: {instanceID: 11278}
     - Class: 114
-      Script: {instanceID: 11752}
+      Script: {instanceID: 11438}
     - Class: 114
-      Script: {instanceID: 12138}
+      Script: {instanceID: 11478}
     - Class: 114
-      Script: {instanceID: 12194}
+      Script: {instanceID: 11866}
     - Class: 114
-      Script: {instanceID: 12348}
+      Script: {instanceID: 12076}
     - Class: 114
-      Script: {instanceID: 12446}
+      Script: {instanceID: 12174}
     - Class: 114
-      Script: {instanceID: 12528}
+      Script: {instanceID: 12256}
     - Class: 114
-      Script: {instanceID: 12616}
+      Script: {instanceID: 12344}
     - Class: 114
-      Script: {instanceID: 12856}
+      Script: {instanceID: 12586}
     - Class: 114
-      Script: {instanceID: 12964}
+      Script: {instanceID: 12694}
+    - Class: 114
+      Script: {instanceID: 12750}
+    - Class: 114
+      Script: {instanceID: 12798}
+    - Class: 114
+      Script: {instanceID: 12846}
     - Class: 114
       Script: {instanceID: 13016}
     - Class: 114
-      Script: {instanceID: 13064}
+      Script: {instanceID: 13046}
     - Class: 114
-      Script: {instanceID: 13112}
+      Script: {instanceID: 13116}
     - Class: 114
-      Script: {instanceID: 13282}
+      Script: {instanceID: 13150}
     - Class: 114
-      Script: {instanceID: 13304}
-    - Class: 114
-      Script: {instanceID: 13374}
-    - Class: 114
-      Script: {instanceID: 13404}
-    - Class: 114
-      Script: {instanceID: 13410}
-    - Class: 114
-      Script: {instanceID: 13422}
+      Script: {instanceID: 13162}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 124
@@ -184,28 +177,36 @@ ScriptsOnlyBuild:
     - Class: 108
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 11554}
+      Script: {instanceID: 11260}
     - Class: 114
-      Script: {instanceID: 11712}
+      Script: {instanceID: 11278}
     - Class: 114
-      Script: {instanceID: 11752}
+      Script: {instanceID: 11438}
     - Class: 114
-      Script: {instanceID: 12138}
+      Script: {instanceID: 11478}
     - Class: 114
-      Script: {instanceID: 12248}
+      Script: {instanceID: 11866}
     - Class: 114
-      Script: {instanceID: 12528}
+      Script: {instanceID: 11976}
     - Class: 114
-      Script: {instanceID: 12904}
+      Script: {instanceID: 12256}
     - Class: 114
-      Script: {instanceID: 13016}
+      Script: {instanceID: 12392}
     - Class: 114
-      Script: {instanceID: 13374}
+      Script: {instanceID: 12634}
     - Class: 114
-      Script: {instanceID: 13404}
+      Script: {instanceID: 12750}
+    - Class: 114
+      Script: {instanceID: 12846}
+    - Class: 114
+      Script: {instanceID: 13116}
+    - Class: 114
+      Script: {instanceID: 13150}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
+      Script: {instanceID: 0}
+    - Class: 136
       Script: {instanceID: 0}
     - Class: 157
       Script: {instanceID: 0}
@@ -224,6 +225,12 @@ ScriptsOnlyBuild:
     - Class: 224
       Script: {instanceID: 0}
   scriptHashData:
+  - hash:
+      serializedVersion: 2
+      Hash: 7072231382eb3c4871b3dd75ad0227e1
+    assemblyName: UnityEngine.UI.dll
+    namespaceName: UnityEngine.UI
+    className: Slider
   - hash:
       serializedVersion: 2
       Hash: 4bc4346a71a8df53a6b106f68ef3a190
@@ -388,6 +395,12 @@ ScriptsOnlyBuild:
     className: AnimationPlayableAsset
   - hash:
       serializedVersion: 2
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: GameStatus
+    className: GameStatus
+  - hash:
+      serializedVersion: 2
       Hash: aba7b2852ef61d175dd9602e7723d5e5
     assemblyName: UnityEngine.UI.dll
     namespaceName: UnityEngine.UI
@@ -460,10 +473,10 @@ ScriptsOnlyBuild:
     className: ScrollRect
   - hash:
       serializedVersion: 2
-      Hash: c8c5e65e9fb858572516474d6e2102bc
+      Hash: 9fe82244c1a86cfe19dd0f7442008d3d
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
-    className: PauseMenu
+    className: PlayingMenu
   - hash:
       serializedVersion: 2
       Hash: c3d3430df9e3ea95e3e3d587961390fb
@@ -508,7 +521,7 @@ ScriptsOnlyBuild:
     className: RawImage
   - hash:
       serializedVersion: 2
-      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+      Hash: dc32d9b3517a511480ca699c978666b5
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: DoorToggle
@@ -524,6 +537,12 @@ ScriptsOnlyBuild:
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: csShowAllEffect
+  - hash:
+      serializedVersion: 2
+      Hash: af57f9f8d6002746b1bc26f154a974e7
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: test
   - hash:
       serializedVersion: 2
       Hash: 783f593b9380cf72d0f7ebfd4a0d4bcd
@@ -598,7 +617,7 @@ ScriptsOnlyBuild:
     className: TextMeshProUGUI
   - hash:
       serializedVersion: 2
-      Hash: 3f6c69c3aee4baa3722eaee4beaddc3f
+      Hash: 2f123428f57a1d4a55768939fbb70ec1
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Npc
@@ -628,10 +647,10 @@ ScriptsOnlyBuild:
     className: PlayerMove
   - hash:
       serializedVersion: 2
-      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+      Hash: 6a9039bed905884b7aeb40c93cc5eb90
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
-    className: test
+    className: CameraFollow
   - hash:
       serializedVersion: 2
       Hash: c3d3430df9e3ea95e3e3d587961390fb
@@ -658,7 +677,7 @@ ScriptsOnlyBuild:
     className: TMP_ColorGradient
   - hash:
       serializedVersion: 2
-      Hash: 1b371919adfde9e1f070e7b90ddcb6fe
+      Hash: cd612d54e43f8eacb88c7fa8c832ad28
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: ObjData
@@ -676,7 +695,7 @@ ScriptsOnlyBuild:
     className: BaseInput
   - hash:
       serializedVersion: 2
-      Hash: beac0c95929ad5e52aadd9b4a62b22bf
+      Hash: 15173f59239b155c6b30581ff82a5097
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: PlayerAttack
@@ -742,13 +761,7 @@ ScriptsOnlyBuild:
     className: SignalEmitter
   - hash:
       serializedVersion: 2
-      Hash: 7072231382eb3c4871b3dd75ad0227e1
-    assemblyName: UnityEngine.UI.dll
-    namespaceName: UnityEngine.UI
-    className: Slider
-  - hash:
-      serializedVersion: 2
-      Hash: d925a142fc39f2b17447551ba59fd912
+      Hash: 0de42d3cb1c27521d2430a52d4c1c2f9
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: HealthBar
@@ -780,4 +793,4 @@ ScriptsOnlyBuild:
   scenePathNames:
   - Assets/MyScenes/main.unity
   - Assets/MyScenes/menu.unity
-  playerPath: C:/unity_lab/UnityFpsExeTest/fps_1.4.exe
+  playerPath: C:/Users/VARLIVE/Desktop/test/fps_1.4.exe

@@ -35,10 +35,7 @@ namespace GameStatus
             {
                 // 遊戲進行中處理......
             }
-            if (Input.GetKeyDown(KeyCode.L))
-            {
-                Debug.Log("now gamestatus is " + status);
-            }
+           
         }
     }
 

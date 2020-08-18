@@ -13,29 +13,34 @@ public class Npc : MonoBehaviour
     public float MixHealth = 1000;
     public float Health;
     public float mass = 1;
+    public float drag = 0;
     public GameObject[] DroppedItems;
     public float damage = 1;
 
     [Header("Effect")]
     public GameObject DeathEffect;
     public GameObject TakeDamageEffect;
-    public GameObject PlumeEffect;
+    public GameObject JumpEffect;
     [Header("HealthBar")]
     public GameObject cam;
     public GameObject HealthBar;
     public Vector3 healthBarPosition;
+    public Vector3 healthBarScale=new Vector3 (1,1,1);
     GameObject healthBar;
 
-    [Header("isNotBoss")]
+    [Header("WalkAround")]
     public GameObject WalkAroundPoint1;
     public GameObject WalkAroundPoint2;
-    public float WalkAroundSpeed=1;
+    public Quaternion OffsetQuaternion=new Quaternion(0,0,0,1);
+    public int MaxWalkAroundSpeed = 5;
+    public int MinWalkAroundSpeed = 2;
+    float WalkAroundSpeed;
     public float WalkAroundPower = 80;
-    public Vector3 WalkPoint;
+    Vector3 WalkPoint;
     public Vector3 centerOfMass;
     float time = 1;
     GameObject tf;
-    public Rigidbody rb;
+    Rigidbody rb;
     public float smooth = 5.0F;
     // Start is called before the first frame update
     void Awake()
@@ -51,10 +56,19 @@ public class Npc : MonoBehaviour
         Health = MixHealth;
         healthBar.transform.GetChild(0).gameObject.GetComponent<HealthBar>().SetMixHealth(MixHealth);
         healthBar.transform.GetChild(0).gameObject.GetComponent<HealthBar>().SetHealth(Health);
-        WalkAroundSpeed = Random.Range(1, 3);
+        WalkAroundSpeed = Random.Range(MinWalkAroundSpeed, MaxWalkAroundSpeed);
         rb.centerOfMass = centerOfMass;
     }
-    
+    void Update()
+    {
+        if (GameStatus.GameStatus.status == gameStatus.Playing)
+        {
+            if (Health < 0)
+            {
+                Death();
+            }
+        }
+    }
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -64,31 +78,39 @@ public class Npc : MonoBehaviour
             {
                 WalkAround();
             }
-            if (Health < 0)
-            {
-                Death();
-            }
+            
         }
         
     }
     void AddAndSetHealthBar()
     {
-        healthBar = Instantiate(HealthBar, transform.position, new Quaternion(0, 0, 0, 0));
-        healthBar.transform.SetParent(gameObject.transform, true);
-        //healthBar.transform.parent = gameObject.transform;
-        healthBar.transform.localScale = new Vector3(1, 1, 1);
-        
-        healthBar.transform.GetChild(0).gameObject.transform.position = healthBarPosition + transform.position;
-        healthBar.GetComponent<Billborard>().cam = cam;
+        if (healthBar == null)
+        {
+            healthBar = Instantiate(HealthBar, transform.position, new Quaternion(0, 0, 0, 0));
+            healthBar.transform.localScale = healthBarScale;
+            healthBar.transform.SetParent(gameObject.transform, true);
+            //healthBar.transform.parent = gameObject.transform;
+            healthBar.transform.GetChild(0).gameObject.transform.position = healthBarPosition + transform.position;
+            healthBar.GetComponent<Billborard>().cam = cam;
+        }
     }
     void AddAndSetRigidbody()
     {
-        rb = gameObject.AddComponent<Rigidbody>() as Rigidbody;
+        if (GetComponent<Rigidbody>() == null)
+            rb = gameObject.AddComponent<Rigidbody>() as Rigidbody;
+        else
+            rb = gameObject.GetComponent<Rigidbody>();
         rb.mass = mass;
+        rb.drag = drag;
+
     }
     void AddAndSetMeshCollider()
     {
-        MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>() as MeshCollider;
+        MeshCollider meshCollider;
+        if (GetComponent<MeshCollider>() == null)
+            meshCollider = gameObject.AddComponent<MeshCollider>() as MeshCollider;
+        else
+            meshCollider = gameObject.GetComponent<MeshCollider>();
         meshCollider.convex = true;
     }
     
@@ -107,7 +129,7 @@ public class Npc : MonoBehaviour
         if (col.gameObject.GetComponent<ObjData>() != null)
         {
             //Debug.Log(col.gameObject.GetComponent<ObjData>().speed);
-            TakeDamage(position, 0.5f * col.gameObject.GetComponent<ObjData>().mass * col.gameObject.GetComponent<ObjData>().speed * col.gameObject.GetComponent<ObjData>().speed);
+            TakeDamage(position, 0.5f * col.gameObject.GetComponent<ObjData>().mass * col.gameObject.GetComponent<ObjData>().speed * col.gameObject.GetComponent<ObjData>().speed * col.gameObject.GetComponent<ObjData>().damage);
         }
     }
     void TakeDamage(Vector3 position,float damage)
@@ -117,7 +139,7 @@ public class Npc : MonoBehaviour
             Health -= damage;
             healthBar.transform.GetChild(0).gameObject.GetComponent<HealthBar>().SetHealth(Health);
         }
-        if( damage > 3 )
+        if (damage > 3 && TakeDamageEffect != null)
             PlayTakeDamageEffect(position);
     }
     void PlayTakeDamageEffect(Vector3 position)
@@ -130,28 +152,33 @@ public class Npc : MonoBehaviour
         time += 1;
         if ((time % (WalkAroundSpeed * 60) == 0)  )
         {
-            rb.AddForce(transform.forward * Time.fixedDeltaTime * WalkAroundSpeed * WalkAroundPower, ForceMode.Impulse);
-            GameObject Effect = Instantiate(PlumeEffect, transform.position, Quaternion.identity);
-            Destroy(Effect, 5);
+            rb.AddForce(tf.transform.forward * Time.fixedDeltaTime * WalkAroundSpeed * WalkAroundPower , ForceMode.Impulse);
+            if(JumpEffect!=null)
+                PlayJumpEffect();
             WalkPoint = new Vector3(
                        Random.Range(WalkAroundPoint1.transform.position.x, WalkAroundPoint2.transform.position.x),
                        Random.Range(WalkAroundPoint1.transform.position.y, WalkAroundPoint2.transform.position.y),
                        Random.Range(WalkAroundPoint1.transform.position.z, WalkAroundPoint2.transform.position.z));
             
             tf.transform.LookAt(WalkPoint);
-            WalkAroundSpeed = Random.Range(1, 3);
+            WalkAroundSpeed = Random.Range(MinWalkAroundSpeed, MaxWalkAroundSpeed);
         }
         tf.transform.position = transform.position;
-        var q= Quaternion.Lerp(transform.rotation, tf.transform.rotation, Time.deltaTime * smooth);
+        var q = Quaternion.Lerp(transform.rotation, tf.transform.rotation * OffsetQuaternion, Time.deltaTime * smooth);
+        //q = (q * OffsetQuaternion).normalized;
         rb.MoveRotation(q);
 
+    }
+    void PlayJumpEffect()
+    {
+        GameObject Effect = Instantiate(JumpEffect, transform.position, Quaternion.identity);
+        Destroy(Effect, 5);
     }
     void Death()
     {
         if(DeathEffect != null)
         {
             GameObject Effect = Instantiate(DeathEffect, transform.position, new Quaternion(0, 0, 0, 0));
-
             Destroy(Effect, 10);
         }
         if (DroppedItems.Length != 0)

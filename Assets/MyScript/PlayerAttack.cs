@@ -63,19 +63,41 @@ public class PlayerAttack : MonoBehaviour
     public GameObject HandPoint_Long;
 
     public GameObject testPoint;
+
+
     // Start is called before the first frame update
+    void Awake()
+    {
+        GameObject s = GameObject.FindWithTag("SaveAndLoadGameData");
+        s.GetComponent<PlayingMenu>().Player = gameObject;
+    }
     void Start()
     {
+        
         Hand = new GameObject("Hand");
+        Health = MixHealth;
         cam.fieldOfView = InitialCameraField;
         InitialUI();
-        Health = MixHealth;
         HealthBar.GetComponent<HealthBar>().SetMixHealth(MixHealth);
         HealthBar.GetComponent<HealthBar>().SetHealth(Health);
         LevelUp();
+        
+    }
+    public void Load(PlayerData p)
+    {
+        if (p != null)
+        {
+            transform.position = p.position;
+            transform.rotation = p.rotation;
+            GetComponent<Rigidbody>().velocity = p.velocity;
+            EXP = p.EXP;
+            LevelUp();
+            Health = p.Health;
+            HealthBar.GetComponent<HealthBar>().SetHealth(Health);
+
+        }
 
     }
-
     // Update is called once per frame
     void Update()
     {
@@ -90,9 +112,8 @@ public class PlayerAttack : MonoBehaviour
             SetBagObjIndex();
 
             Eat();
-            AccumulateAttack();
-            
-            
+            AccumulateAttackUpdate();
+
             Test();
 
         }
@@ -104,6 +125,8 @@ public class PlayerAttack : MonoBehaviour
         {
             CheckUp();
             SetHandPosition();
+            AccumulateAttackFixedUpdate();
+
         }
     }
     void CheckUp()
@@ -117,7 +140,7 @@ public class PlayerAttack : MonoBehaviour
             {
                 Debug.DrawLine(ray.origin, hit.point, Color.red);
 
-                if (BeCheckObj != null && BeCheckObj.tag == "CanThrow")
+                if (BeCheckObj != null && BeCheckObj.tag == "Object")
                 {
                     if (BeCheckObj.GetComponent<Renderer>() != null)
                     {
@@ -246,6 +269,9 @@ public class PlayerAttack : MonoBehaviour
                 HealthBar.GetComponent<HealthBar>().SetHealth(Health);
                 LevelUp();
 
+                GameObject s = GameObject.FindWithTag("SaveAndLoadGameData");
+                s.GetComponent<PlayingMenu>().ObjectDataList.Remove(InBag[BagObjIndex]);
+
                 Destroy(InBag[BagObjIndex]);
                 InBag.Remove(InBag[BagObjIndex]);
                 
@@ -278,7 +304,7 @@ public class PlayerAttack : MonoBehaviour
             Vector3 OffsetPosition = OnHand.GetComponent<ObjData>().OffsetPosition;
             Transform HandFt = Hand.transform;
 
-            var rb =OnHand.GetComponent<Rigidbody>();
+            var rb = OnHand.GetComponent<Rigidbody>();
 
             //rb.MoveRotation(HandFt.rotation * OnHand.GetComponent<ObjData>().OffsetQuaternion);
             //rb.MovePosition(HandFt.position + OnHand.transform.rotation * -OffsetPosition);
@@ -328,7 +354,7 @@ public class PlayerAttack : MonoBehaviour
 
     }
 
-    void AccumulateAttack()
+    void AccumulateAttackUpdate()
     {
 
 
@@ -336,14 +362,7 @@ public class PlayerAttack : MonoBehaviour
         {
             InAccumulate = true;
         }
-        if (Input.GetMouseButton(0) && InAccumulate)
-        {
-            power = ((InitialPower - MixPower) / MixAccumulateTime / MixAccumulateTime) * (AccumulateTime / 60 - MixAccumulateTime) * (AccumulateTime / 60 - MixAccumulateTime) + MixPower;
-            AccumulateTime += 1;
-            //cam.fieldOfView = MixPower / power * MixCameraField;
-            cam.fieldOfView = (MixCameraField - InitialCameraField) / (MixPower - InitialPower) * (power - InitialPower) + InitialCameraField;
-        }
-
+        
         if (AccumulateTime / 60 < MixAccumulateTime)
         {
             if (Input.GetMouseButtonUp(0) && InAccumulate)
@@ -375,17 +394,26 @@ public class PlayerAttack : MonoBehaviour
 
 
     }
-
+    void AccumulateAttackFixedUpdate()
+    {
+        if (Input.GetMouseButton(0) && InAccumulate)
+        {
+            power = ((InitialPower - MixPower) / MixAccumulateTime / MixAccumulateTime) * (AccumulateTime / 60 - MixAccumulateTime) * (AccumulateTime / 60 - MixAccumulateTime) + MixPower;
+            AccumulateTime += 1;
+            //cam.fieldOfView = MixPower / power * MixCameraField;
+            cam.fieldOfView = (MixCameraField - InitialCameraField) / (MixPower - InitialPower) * (power - InitialPower) + InitialCameraField;
+        }
+    }
     public void TakeDamage(Vector3 position,float damage)
     {
         if (transform.position.y < position.y)
         {
-            GetComponent<Rigidbody>().AddForce((transform.position - position)-new Vector3(0, (transform.position - position).y,0) * Time.fixedDeltaTime * 100f, ForceMode.Impulse);
+            GetComponent<Rigidbody>().AddForce((transform.position - position)-new Vector3(0, (transform.position - position).y,0) * Time.fixedDeltaTime * 100, ForceMode.VelocityChange);
 
         }
         else
         {
-            GetComponent<Rigidbody>().AddForce((transform.position-position) * Time.fixedDeltaTime *800f, ForceMode.Impulse);
+            GetComponent<Rigidbody>().AddForce((transform.position-position) * Time.fixedDeltaTime * 100, ForceMode.VelocityChange);
         }
         Health -= damage;
         if (Health <= 0)
