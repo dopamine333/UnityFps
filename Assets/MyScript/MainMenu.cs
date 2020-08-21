@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using GameStatus;
 
 public class MainMenu : MonoBehaviour
 {
@@ -28,7 +27,7 @@ public class MainMenu : MonoBehaviour
         cam.transform.position = Vector3.SmoothDamp(cam.transform.position, targetPosition, ref currentVelocity, smoothTime, maxSpeed);
         if (Input.GetKeyDown(KeyCode.L))
         {
-            Debug.Log("now gamestatus is " + GameStatus.GameStatus.status);
+            Debug.Log("now gamestatus is " + GameStatus.status);
         }
     }
     public void LoadMainScene()
@@ -38,8 +37,20 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadScene("main");
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        GameStatus.GameStatus.status = gameStatus.Playing;
+        GameStatus.status = gameStatus.Playing;
 
+    }
+    public void Load1()
+    {
+        GameStatus.fileName = FileName.File1;
+    }
+    public void Load2()
+    {
+        GameStatus.fileName = FileName.File2;
+    }
+    public void Load3()
+    {
+        GameStatus.fileName = FileName.File3;
     }
     public void QuitGame()
     {

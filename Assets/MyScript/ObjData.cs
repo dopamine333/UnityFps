@@ -4,7 +4,7 @@
 //using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
-using GameStatus;
+using UnityEditor;
 
 public class ObjData : MonoBehaviour
 {
@@ -21,7 +21,7 @@ public class ObjData : MonoBehaviour
     public float damage = 1;
 
     public Vector3 OffsetPosition;
-    public Quaternion OffsetQuaternion;
+    public Quaternion OffsetQuaternion=new Quaternion(0, 0, 0, 1);
     public bool CanEat;
     public int EXP;
     public float PlusHealthNum;
@@ -47,45 +47,61 @@ public class ObjData : MonoBehaviour
     public Sprite mySprite;
 
     [Header("")]
-    public float speed;
-    Vector3 lastPosition = Vector3.zero;
-    Rigidbody rb;
+    public Rigidbody rb;
     public MeshCollider meshCollider;
-    // Use this for initialization
-    static int Num = 0;
-    public int MyNum = -1;
+   
+    public bool InBag;
     
+    public string MyPrefabPath;
+#if UNITY_EDITOR
+ 
+    public void OnValidate ()
+    {
+        if (!Application.isPlaying)
+        {
+            var Prefab = PrefabUtility.GetCorrespondingObjectFromOriginalSource(gameObject);
+            var Path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(gameObject);
+            Path = Path.Substring(17, Path.Length - 24);
+            MyPrefabPath = Path;
+        }
+    }
+ 
+#endif
+
     void Awake()
     {
-        
         AddAndSetRigidbody();
         AddAndSetMeshCollider();
 
-        GameObject s = GameObject.FindWithTag("SaveAndLoadGameData");
-        s.GetComponent<PlayingMenu>().ObjectDataList.Add(gameObject);
     }
 
     void Start()
     {
         if (type == Type.Small || type == Type.Big)
         {
-            OffsetQuaternion = new Quaternion(0, 0, 0, 1);
+            //OffsetQuaternion = new Quaternion(0, 0, 0, 1);
         }
 
         AddAndSetTrailEffect();
         AddAndSetAudioSource();
-        SetTag();
+        gameObject.tag = "Object";
     }
     public void Load(ObjectData o)
     {
         if (o != null)
         {
+            AddAndSetRigidbody();
+            AddAndSetMeshCollider();
             transform.position = o.position;
             transform.rotation = o.rotation;
-            GetComponent<Rigidbody>().velocity = o.velocity;
+            rb.velocity = o.velocity;
+            rb.isKinematic = o.isKinematic;
+            InBag = o.InBag;
+            MyPrefabPath = o.MyPrefabPath;
 
         }
     }
+    
     void Update()
     {
         
@@ -93,32 +109,32 @@ public class ObjData : MonoBehaviour
 
     void FixedUpdate()
     {
-        GetSpeed();
+        
     }
-    void GetSpeed()
-    {
-        speed = rb.velocity.magnitude;
-
-    }
+   
     void AddAndSetRigidbody()
     {
-        rb = gameObject.AddComponent<Rigidbody>() as Rigidbody;
+        if (GetComponent<Rigidbody>() == null)
+            rb = gameObject.AddComponent<Rigidbody>() as Rigidbody;
+        else
+            rb = gameObject.GetComponent<Rigidbody>();
         rb.mass = mass;
         rb.isKinematic = true;
     }
     void AddAndSetMeshCollider()
     {
-        meshCollider = gameObject.AddComponent<MeshCollider>() as MeshCollider;
+        if (GetComponent<MeshCollider>() == null)
+            meshCollider = gameObject.AddComponent<MeshCollider>() as MeshCollider;
+        else
+            meshCollider = gameObject.GetComponent<MeshCollider>();
         meshCollider.convex = true;
         
     }
-    void SetTag()
-    {
-        gameObject.tag = "Object";
-    }
+   
     void AddAndSetTrailEffect()
     {
-        GameObject Effect = Instantiate(TrailEffect, transform.position + TrailEffectPosition*2, new Quaternion(0, 0, 0, 0));
+        var tep = new Vector3(TrailEffectPosition.x * transform.localScale.x, TrailEffectPosition.y * transform.localScale.y, TrailEffectPosition.z * transform.localScale.z);
+        GameObject Effect = Instantiate(TrailEffect, transform.position + transform.rotation * tep, new Quaternion(0, 0, 0, 0));
         Effect.transform.parent = gameObject.transform;
         Effect.transform.localScale = new Vector3(1, 1, 1);
     }
@@ -153,10 +169,10 @@ public class ObjData : MonoBehaviour
         
         if(obj.gameObject.tag != "Player")
         {
+            var p = 0.5f * rb.velocity.magnitude * rb.velocity.magnitude * mass;
+            PlayCollisionAudio(p);
 
-            PlayCollisionAudio(0.5f * speed * speed * mass);
-
-            if (0.5f * speed * speed * mass > 5) 
+            if (p > 5) 
             {
                 PlayCollisionEffect(position);
             }

@@ -8,10 +8,13 @@ MonoImporter:
       type: 3}
   - TakeDamageEffect: {fileID: 877365042386853426, guid: aa1ee3fc968825643b5076ea625bc722,
       type: 3}
+  - JumpEffect: {instanceID: 0}
   - cam: {instanceID: 0}
-  - HealthBar: {instanceID: 0}
+  - HealthBar: {fileID: 8509154883958269982, guid: 20692a7b6fb79f44d944d1f97dcd6b67,
+      type: 3}
   - WalkAroundPoint1: {instanceID: 0}
   - WalkAroundPoint2: {instanceID: 0}
+  - MyPrefab: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

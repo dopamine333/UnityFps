@@ -4,9 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 
-namespace GameStatus
-{
-    public enum gameStatus
+  public enum gameStatus
     {
         MainMenu,
         Loading,
@@ -14,30 +12,18 @@ namespace GameStatus
         Pause,
         GameOver
     }
-    public class GameStatus : MonoBehaviour
+    public enum FileName
     {
-        public static gameStatus status = gameStatus.Playing;
-
-        // Update is called once per frame
-        void Update()
-        {
-           
-            if (status == gameStatus.GameOver)
-            {
-                Debug.Log("now gamestatus is " + status);
-                // 開頭選單處理......
-            }
-            if (status == gameStatus.Playing)
-            {
-                // 遊戲進行中處理......
-            }
-            if (status == gameStatus.Pause)
-            {
-                // 遊戲進行中處理......
-            }
-           
-        }
+        File1,
+        File2,
+        File3
     }
+public class GameStatus : MonoBehaviour
+{
+    public static gameStatus status = gameStatus.Playing;
+    public static FileName fileName = FileName.File1;
 
 }
+
+
 

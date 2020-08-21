@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 
 using UnityEngine;
-using GameStatus;
 
 
 public class PlayerMove : MonoBehaviour
@@ -16,19 +15,20 @@ public class PlayerMove : MonoBehaviour
 
     [SerializeField]
     private Camera cam;
-    private float currentCameraRotationX = 0f;
+    public float currentCameraRotationX = 0f;
     [SerializeField]
     private bool IsGround = false;
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        
+        cam.tag = "PlayerCam";
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (GameStatus.GameStatus.status == gameStatus.Playing)
+        if (GameStatus.status == gameStatus.Playing)
         {
             Jump();
             Test();
@@ -38,7 +38,7 @@ public class PlayerMove : MonoBehaviour
     }
     void FixedUpdate()
     {
-        if (GameStatus.GameStatus.status == gameStatus.Playing)
+        if (GameStatus.status == gameStatus.Playing)
         {
             Movement();
         }

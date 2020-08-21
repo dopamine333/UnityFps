@@ -8,6 +8,8 @@ TagManager:
   - Door
   - Object
   - SaveAndLoadGameData
+  - Npc
+  - PlayerCam
   layers:
   - Default
   - TransparentFX

@@ -4,7 +4,7 @@ using System.Collections.Specialized;
 using System.Threading;
 //using System.Runtime.Remoting.Messaging;
 using UnityEngine;
-using GameStatus;
+using UnityEditor;
 
 public class Npc : MonoBehaviour
 {
@@ -30,7 +30,9 @@ public class Npc : MonoBehaviour
 
     [Header("WalkAround")]
     public GameObject WalkAroundPoint1;
+    public Vector3 wap1;
     public GameObject WalkAroundPoint2;
+    public Vector3 wap2;
     public Quaternion OffsetQuaternion=new Quaternion(0,0,0,1);
     public int MaxWalkAroundSpeed = 5;
     public int MinWalkAroundSpeed = 2;
@@ -42,14 +44,27 @@ public class Npc : MonoBehaviour
     GameObject tf;
     Rigidbody rb;
     public float smooth = 5.0F;
-    // Start is called before the first frame update
+    public string MyPrefabPath;
+#if UNITY_EDITOR
+ 
+    public void OnValidate ()
+    {
+        if (!Application.isPlaying)
+        {
+            var Prefab = PrefabUtility.GetCorrespondingObjectFromOriginalSource(gameObject);
+            var Path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(gameObject);
+            Path = Path.Substring(17, Path.Length - 24);
+            MyPrefabPath = Path;
+        }
+    }
+ 
+#endif
     void Awake()
     {
         tf = new GameObject();
         AddAndSetMeshCollider();
         AddAndSetRigidbody();
         AddAndSetHealthBar();
-        
     }
     void Start()
     {
@@ -58,21 +73,43 @@ public class Npc : MonoBehaviour
         healthBar.transform.GetChild(0).gameObject.GetComponent<HealthBar>().SetHealth(Health);
         WalkAroundSpeed = Random.Range(MinWalkAroundSpeed, MaxWalkAroundSpeed);
         rb.centerOfMass = centerOfMass;
+        gameObject.tag = "Npc";
+        if (WalkAroundPoint1 != null) { wap1 = WalkAroundPoint1.transform.position; }
+        if (WalkAroundPoint2 != null) { wap2 = WalkAroundPoint2.transform.position; }
+
+       
     }
+    public void Load(NpcData n)
+    {
+        if (n != null)
+        {
+            AddAndSetRigidbody();
+            AddAndSetMeshCollider();
+            transform.position = n.position;
+            transform.rotation = n.rotation;
+            rb.velocity = n.velocity;
+            if (n.Health <= MixHealth)
+                Health = n.Health;
+            wap1 = n.wap1;
+            wap2 = n.wap2;
+            MyPrefabPath = n.MyPrefabPath;
+
+            healthBar.transform.GetChild(0).gameObject.GetComponent<HealthBar>().SetHealth(Health);
+
+        }
+    }
+    
     void Update()
     {
-        if (GameStatus.GameStatus.status == gameStatus.Playing)
+        if (GameStatus.status == gameStatus.Playing)
         {
-            if (Health < 0)
-            {
-                Death();
-            }
+            
         }
     }
     // Update is called once per frame
     void FixedUpdate()
     {
-        if(GameStatus.GameStatus.status == gameStatus.Playing)
+        if(GameStatus.status == gameStatus.Playing)
         {
             if (!isBoss)
             {
@@ -86,6 +123,8 @@ public class Npc : MonoBehaviour
     {
         if (healthBar == null)
         {
+            GameObject pc = GameObject.FindWithTag("PlayerCam");
+            cam = pc;
             healthBar = Instantiate(HealthBar, transform.position, new Quaternion(0, 0, 0, 0));
             healthBar.transform.localScale = healthBarScale;
             healthBar.transform.SetParent(gameObject.transform, true);
@@ -129,7 +168,8 @@ public class Npc : MonoBehaviour
         if (col.gameObject.GetComponent<ObjData>() != null)
         {
             //Debug.Log(col.gameObject.GetComponent<ObjData>().speed);
-            TakeDamage(position, 0.5f * col.gameObject.GetComponent<ObjData>().mass * col.gameObject.GetComponent<ObjData>().speed * col.gameObject.GetComponent<ObjData>().speed * col.gameObject.GetComponent<ObjData>().damage);
+            var o = col.gameObject.GetComponent<ObjData>();
+            TakeDamage(position, 0.5f * o.mass * o.rb.velocity.magnitude * o.rb.velocity.magnitude * o.damage);
         }
     }
     void TakeDamage(Vector3 position,float damage)
@@ -138,6 +178,15 @@ public class Npc : MonoBehaviour
         {
             Health -= damage;
             healthBar.transform.GetChild(0).gameObject.GetComponent<HealthBar>().SetHealth(Health);
+            if (Health < 0)
+            {
+                if (DeathEffect != null)
+                {
+                    GameObject Effect = Instantiate(DeathEffect, transform.position, new Quaternion(0, 0, 0, 0));
+                    Destroy(Effect, 10);
+                }
+                Death();
+            }
         }
         if (damage > 3 && TakeDamageEffect != null)
             PlayTakeDamageEffect(position);
@@ -156,9 +205,9 @@ public class Npc : MonoBehaviour
             if(JumpEffect!=null)
                 PlayJumpEffect();
             WalkPoint = new Vector3(
-                       Random.Range(WalkAroundPoint1.transform.position.x, WalkAroundPoint2.transform.position.x),
-                       Random.Range(WalkAroundPoint1.transform.position.y, WalkAroundPoint2.transform.position.y),
-                       Random.Range(WalkAroundPoint1.transform.position.z, WalkAroundPoint2.transform.position.z));
+                       Random.Range(wap1.x, wap2.x),
+                       Random.Range(wap1.y, wap2.y),
+                       Random.Range(wap1.z, wap2.z));
             
             tf.transform.LookAt(WalkPoint);
             WalkAroundSpeed = Random.Range(MinWalkAroundSpeed, MaxWalkAroundSpeed);
@@ -174,20 +223,22 @@ public class Npc : MonoBehaviour
         GameObject Effect = Instantiate(JumpEffect, transform.position, Quaternion.identity);
         Destroy(Effect, 5);
     }
-    void Death()
+    public void Death()
     {
-        if(DeathEffect != null)
-        {
-            GameObject Effect = Instantiate(DeathEffect, transform.position, new Quaternion(0, 0, 0, 0));
-            Destroy(Effect, 10);
-        }
         if (DroppedItems.Length != 0)
             for (int i = 0; i < DroppedItems.Length; i++)
             {
-                
-                GameObject obj=Instantiate(DroppedItems[i],transform.position, new Quaternion(0, 0, 0, 0));
-                
+
+                GameObject obj = Instantiate(DroppedItems[i], transform.position + Vector3.up, new Quaternion(0, 0, 0, 0)) ;
+                if (obj.GetComponent<ObjData>() != null)
+                {
+                    obj.GetComponent<Rigidbody>().isKinematic = false;
+                }
             }
+
+        GameObject s = GameObject.FindWithTag("SaveAndLoadGameData");
+        s.GetComponent<PlayingMenu>().NpcDataList.Remove(gameObject);
+
         Destroy(gameObject);
     }
 }

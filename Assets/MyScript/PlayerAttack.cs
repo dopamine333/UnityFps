@@ -4,13 +4,14 @@ using System.Collections.Specialized;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-using GameStatus;
+using System.IO;
+using UnityEditor;
 
 public class PlayerAttack : MonoBehaviour
 {
     public int BagObjIndex = 0;
     public GameObject OnHand;
-    public List<GameObject> InBag;
+    public List<GameObject> InBag = new List<GameObject>();
     public float smooth = 12f;
 
     //public int NowBagLength = 0;
@@ -61,15 +62,11 @@ public class PlayerAttack : MonoBehaviour
     public GameObject HandPoint_Small;
     public GameObject HandPoint_Big;
     public GameObject HandPoint_Long;
-
     public GameObject testPoint;
 
-
-    // Start is called before the first frame update
     void Awake()
     {
-        GameObject s = GameObject.FindWithTag("SaveAndLoadGameData");
-        s.GetComponent<PlayingMenu>().Player = gameObject;
+
     }
     void Start()
     {
@@ -81,7 +78,8 @@ public class PlayerAttack : MonoBehaviour
         HealthBar.GetComponent<HealthBar>().SetMixHealth(MixHealth);
         HealthBar.GetComponent<HealthBar>().SetHealth(Health);
         LevelUp();
-        
+        gameObject.tag = "Player";
+
     }
     public void Load(PlayerData p)
     {
@@ -91,21 +89,21 @@ public class PlayerAttack : MonoBehaviour
             transform.rotation = p.rotation;
             GetComponent<Rigidbody>().velocity = p.velocity;
             EXP = p.EXP;
-            LevelUp();
             Health = p.Health;
+            GetComponent<PlayerMove>().currentCameraRotationX = p.currentCameraRotationX;
+            BagObjIndex = p.BagObjIndex;
+           
+            LevelUp();
             HealthBar.GetComponent<HealthBar>().SetHealth(Health);
-
+            SetBagObjIndex();
         }
 
     }
     // Update is called once per frame
     void Update()
     {
-        if (GameStatus.GameStatus.status == gameStatus.Playing)
+        if (GameStatus.status == gameStatus.Playing)
         {
-            
-
-
             PickUp();
             OpenOrCloseDoor();
             SetUI();
@@ -121,11 +119,16 @@ public class PlayerAttack : MonoBehaviour
     }
     void FixedUpdate()
     {
-        if (GameStatus.GameStatus.status == gameStatus.Playing)
+        if (GameStatus.status == gameStatus.Playing)
         {
             CheckUp();
             SetHandPosition();
             AccumulateAttackFixedUpdate();
+
+        }
+        else if(GameStatus.status == gameStatus.Pause)
+        {
+            SetHandPosition();
 
         }
     }
@@ -194,10 +197,14 @@ public class PlayerAttack : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E) && BeCheckObj != null && BeCheckObj.GetComponent<ObjData>() != null)
         {
-            BeCheckObj.GetComponent<Rigidbody>().velocity = Vector3.zero;
-            BeCheckObj.GetComponent<Rigidbody>().isKinematic = true;
+            var rb = BeCheckObj.GetComponent<Rigidbody>();
+            var o = BeCheckObj.GetComponent<ObjData>();
+            rb.velocity = Vector3.zero;
+            rb.isKinematic = true;
+            o.meshCollider.isTrigger = true;
+            o.InBag = true;
 
-            BeCheckObj.GetComponent<ObjData>().meshCollider.isTrigger = true;
+
 
             InBag.Insert(BagObjIndex, BeCheckObj);
 
@@ -206,7 +213,11 @@ public class PlayerAttack : MonoBehaviour
         }
 
     }
-
+    public GameObject GetPrefabAsset(GameObject go)
+    {
+        string pathToPrefab = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(go);
+        return PrefabUtility.GetCorrespondingObjectFromSourceAtPath(go, pathToPrefab);
+    }
     void OpenOrCloseDoor()
     {
         if (Input.GetKeyDown(KeyCode.E) && BeCheckObj != null && BeCheckObj.tag == "Door")
@@ -220,7 +231,6 @@ public class PlayerAttack : MonoBehaviour
     {
         for (int i = 0; i < InBag.Count; i++)
         {
-            //Count獲得List中元素數目
             InBag[i].SetActive(false);
         }
             if (Input.GetAxis("Mouse ScrollWheel") > 0)
@@ -260,8 +270,10 @@ public class PlayerAttack : MonoBehaviour
             if (Input.GetMouseButtonDown(1))
             {
                 Debug.Log("Eat!!!");
-                EXP += OnHand.GetComponent<ObjData>().EXP;
-                Health += OnHand.GetComponent<ObjData>().PlusHealthNum;
+                var o = OnHand.GetComponent<ObjData>();
+
+                EXP += o.EXP;
+                Health += o.PlusHealthNum;
                 if (Health >= MixHealth)
                 {
                     Health = MixHealth;
@@ -269,11 +281,10 @@ public class PlayerAttack : MonoBehaviour
                 HealthBar.GetComponent<HealthBar>().SetHealth(Health);
                 LevelUp();
 
-                GameObject s = GameObject.FindWithTag("SaveAndLoadGameData");
-                s.GetComponent<PlayingMenu>().ObjectDataList.Remove(InBag[BagObjIndex]);
+                o.InBag = false;
 
-                Destroy(InBag[BagObjIndex]);
-                InBag.Remove(InBag[BagObjIndex]);
+                Destroy(OnHand);
+                InBag.Remove(OnHand);
                 
                 SetBagObjIndex();
             }
@@ -302,22 +313,24 @@ public class PlayerAttack : MonoBehaviour
 
             }
             Vector3 OffsetPosition = OnHand.GetComponent<ObjData>().OffsetPosition;
+            var OffsetQuaternion = OnHand.GetComponent<ObjData>().OffsetQuaternion;
             Transform HandFt = Hand.transform;
 
             var rb = OnHand.GetComponent<Rigidbody>();
 
             //rb.MoveRotation(HandFt.rotation * OnHand.GetComponent<ObjData>().OffsetQuaternion);
+            OnHand.transform.rotation = HandFt.rotation * OffsetQuaternion;
+
             //rb.MovePosition(HandFt.position + OnHand.transform.rotation * -OffsetPosition);
-            OnHand.transform.rotation = HandFt.rotation * OnHand.GetComponent<ObjData>().OffsetQuaternion;
-            OnHand.transform.position = HandFt.position + OnHand.transform.rotation * -OffsetPosition;
+            OnHand.transform.position = HandFt.position + OnHand.transform.rotation * Quaternion.Inverse(OffsetQuaternion) * OffsetPosition;
         }
         else
         {
             HandPoint = HandPoint_Small;
         }
-        Hand.transform.position = Vector3.Lerp(Hand.transform.position, HandPoint.transform.position, Time.deltaTime * smooth);
-        Hand.transform.rotation = Quaternion.Lerp(Hand.transform.rotation, HandPoint.transform.rotation, Time.deltaTime * smooth);
 
+        Hand.transform.position = Vector3.Lerp(Hand.transform.position, HandPoint.transform.position, Time.deltaTime * smooth);
+        Hand.transform.rotation = Quaternion.Slerp(Hand.transform.rotation, HandPoint.transform.rotation, Time.deltaTime * smooth);
 
     }
     void Attack(float power)
@@ -339,11 +352,13 @@ public class PlayerAttack : MonoBehaviour
             //OnHand.transform.eulerAngles += new Vector3(0, 0, vec.x);
         }
 
-        OnHand.GetComponent<Rigidbody>().isKinematic = false;
-        OnHand.GetComponent<ObjData>().meshCollider.isTrigger = false;
-
+        var rb = OnHand.GetComponent<Rigidbody>();
+        var o = OnHand.GetComponent<ObjData>();
+        rb.isKinematic = false;
+        o.meshCollider.isTrigger = false;
+        o.InBag = false;
         //OnHand.GetComponent<Rigidbody>().AddForce(cam.transform.forward * Time.fixedDeltaTime * power, ForceMode.Impulse);
-        OnHand.GetComponent<Rigidbody>().AddForce((BeCheckPoint - HandPoint.transform.position).normalized * Time.fixedDeltaTime * power, ForceMode.Impulse);
+        rb.AddForce((BeCheckPoint - HandPoint.transform.position).normalized * Time.fixedDeltaTime * power, ForceMode.Impulse);
 
         GetComponent<Rigidbody>().AddForce(-cam.transform.forward * Time.fixedDeltaTime * power, ForceMode.Impulse);
         //OnHand.GetComponent<Rigidbody>().angularVelocity = Random.insideUnitSphere * Time.fixedDeltaTime;
@@ -424,7 +439,7 @@ public class PlayerAttack : MonoBehaviour
     }
     void GameOver()
     {
-        GameStatus.GameStatus.status = gameStatus.GameOver;
+        GameStatus.status = gameStatus.GameOver;
 
     }
     void LevelUp()
